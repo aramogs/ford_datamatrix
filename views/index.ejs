@@ -1,0 +1,319 @@
+<%include ./static/header.ejs %>
+<%include ./static/sidebar.ejs%>
+<%include ./static/navbar.ejs%>
+<!-- Begin Page Content -->
+<div class="container-fluid" id="back">
+
+  <!-- Page Heading -->
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="card shadow mb-4 shadow-lg ">
+        <div class="card-header">
+          <div class="row">
+            <div class="col-lg-4"></div>
+            <div class="col-lg-4 text-center">
+              <img class="animated pulse  " id="logo_index" src="/img/TristoneLogo.png" alt="">
+            </div>
+
+
+            <div class="col-lg-4 text-right ">
+              <h5 class="">No. Empleado <span class="badge badge-secondary badge-pill">86259</span></h5>
+              <h5>Usuario <span class="badge badge-secondary badge-pill">Aram Guillen</span></h5>
+            </div>
+          </div>
+
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-lg-1"></div>
+            <div class="col-10">
+              <div class="card-body">
+                <div class="form-group">
+                  <h2>No. SAP:</h2>
+                  <input type="text" class="form-control mt-2 text-center" name="no_sap" id="no_sap"
+                    aria-describedby="helpId" placeholder="" style="font-size: 40px; font-weight: bold;">
+                </div>
+                <div class="form-group">
+                  <h2>No Cliente:</h2>
+                  <input type="text" class="form-control mt-2 text-center" name="no_cliente" id="no_cliente"
+                    aria-describedby="helpId" placeholder="" style="font-size: 40px; font-weight: bold;">
+                </div>
+                <div class="form-group">
+                  <h2>Data Matrix:</h2>
+                  <input type="text" class="form-control mt-2 text-center" name="dataMatrix" id="dataMatrix"
+                    aria-describedby="helpId" placeholder="" style="font-size: 40px; font-weight: bold;">
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-1"></div>
+          </div>
+
+          <div class="row">
+            <div class="col-lg-3">
+              <h2>Std. Pack: <span class="badge badge-secondary"> <span id="current_value"></span>/<span
+                    id="std_pack"></span> </span></h2>
+            </div>
+            <div class="col-7"></div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="row mt-n3 " id="alert-message">
+    <div class="col-lg-12">
+
+      <div class="card bg-transparent border-0">
+        <div class="card-body">
+          <div class="alert alert-danger text-center" role="alert" id="alert">
+            <strong>
+              <h2><span> Mensage: </span> <span id="message"></span></h2>
+            </strong>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- Button trigger modal
+  <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalCenter">
+    Launch demo modal
+  </button> -->
+
+  <!-- Modal -->
+  <div class="modal fade" id="modalCenter" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog"
+    aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div class="col-lg-12 text-center">
+            <img class="animated pulse  " id="logo_index" src="/img/TristoneLogo.png" alt="">
+          </div>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-1"></div>
+            <div class="col-10">
+              <div class="form-group">
+                <h2>No. Serial:</h2>
+                <div class="input-group mb-3">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text"><span class="fas fa-barcode"></span></span>
+                  </div>
+                  <input type="text" class="form-control  text-center" name="no_serial" id="no_serial"
+                    aria-describedby="helpId" placeholder="" style="font-size: 40px; font-weight: bold;">
+                </div>
+                <small id="helpId" class="form-text text-muted">Escaner serial de etiqueta UC</small>
+              </div>
+            </div>
+            <div class="col-1"></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <div class="col-lg-12">
+            <div class="alert alert-danger text-center" role="alert" id="alertModal">
+              <strong>
+                <h2><span> Mensage: </span> <span id="messageModal"></span></h2>
+              </strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Modal -->
+
+  <!-- /.container-fluid -->
+</div>
+<!-- End of Main Content -->
+<!-- Vector Maps -->
+
+<% include ./static/footer.ejs %>
+
+<script>
+
+
+  //TODO Cambiar el tiempo de redis a 4 dias o 345600 segundos
+
+  let dataMatrix_array = []
+  let std_pack = 0
+
+  $('#alert-message').hide()
+  $('.modal-footer').hide()
+  $('#current_value').text("0")
+  $('#std_pack').text("0")
+  $('#no_sap').focus()
+
+
+  function easeIn(item) {
+    $(`${item}`).fadeIn()
+  }
+  function easeOut(item) {
+    $(`${item}`).fadeOut()
+  }
+
+  $('#no_sap').keypress(function (event) {
+
+    if (event.keyCode === 13) {
+
+      let xhr = new XMLHttpRequest();
+      xhr.open('GET', `/verificar_sap/"${$('#no_sap').val()}"`, true);
+      //console.log('READYSTATE: ', xhr.readyState);
+      xhr.onload = function () {
+        //console.log('READYSTATE: ', xhr.readyState);
+        if (this.status == 200) {
+
+          if (this.responseText != "{}") {
+
+            let response = JSON.parse(this.responseText)
+            std_pack = response.std_pack
+            $('#std_pack').text(`${std_pack}`)
+            $('#no_cliente').val(response.cust_part).attr("readonly", true)
+            $('#message').text(" Busqueda exitosa ")
+            $('#alert').removeClass("alert-danger").addClass("alert-success")
+            // $('#alert-message').fadeIn("slower").delay(1000).fadeOut();
+            $('#alert-message').stop(true, false).animate({ opacity: 1 }, 0, easeIn('#alert-message')).animate({ opacity: 1 }, 1000).animate({ opacity: 0 }, 0, easeOut('#alert-message'));
+            $('#no_sap').attr("readonly", true)
+            $('#dataMatrix').focus()
+          } else {
+            $('#message').text(" No. SAP no encontrado ")
+            $('#alert').removeClass("alert-success").addClass("alert-danger")
+            // $('#alert-message').fadeIn("slower").delay(1000).fadeOut();
+            $('#alert-message').stop(true, false).animate({ opacity: 1 }, 0, easeIn('#alert-message')).animate({ opacity: 1 }, 1000).animate({ opacity: 0 }, 0, easeOut('#alert-message'));
+            $('#no_sap').val("").delay(1000)
+          }
+        } else if (this.status = 404) {
+          console.error(this.status);
+        }
+      }
+      xhr.onerror = function () {
+        console.log('Request Error...');
+      }
+      xhr.send();
+    }
+  })
+
+
+  $('#dataMatrix').keypress(function (event) {
+
+
+    if (event.keyCode === 13) {
+      let dataMatrix = $('#dataMatrix').val()
+      let cust_part = $('#no_cliente').val()
+      let data = dataMatrix.split(" ")
+      let no_client = `${data[1]}-${data[2]}-${data[3]}`;
+      let status
+
+      if (dataMatrix != "80") {
+
+        let request = $.ajax({
+          type: "GET",
+          url: `/verificar_datamatrix/${dataMatrix}`,
+          //contentType: "application/json; charset=utf-8",
+          dataType: "json",
+        });
+
+        request.done(function (result) {
+          status = JSON.parse(result)
+          if (no_client == cust_part) {
+            if (status === "duplicado" || dataMatrix_array.includes(dataMatrix)) {
+              console.log(status);
+
+              //Valor Duplicado
+              $('#dataMatrix').val('')
+              $('#message').text(" DataMatrix duplicada ")
+              $('#alert').removeClass("alert-success").addClass("alert-danger")
+              //$('#alert-message').slideDown("slower").delay(1000).fadeOut();
+              $('#alert-message').stop(true, false).animate({ opacity: 1 }, 0, easeIn('#alert-message')).animate({ opacity: 1 }, 1000).animate({ opacity: 0 }, 0, easeOut('#alert-message'));
+
+            } else {
+              // console.error(status);
+              //Valor Nuevo
+
+              dataMatrix_array.push(dataMatrix)
+              $('#message').text(" DataMatrix correcta ")
+              $('#alert').removeClass("alert-danger").addClass("alert-success")
+              //$('#alert-message').slideDown("slower").delay(1000).fadeOut();
+              $('#alert-message').stop(true, false).animate({ opacity: 1 }, 0, easeIn('#alert-message')).animate({ opacity: 1 }, 1000).animate({ opacity: 0 }, 0, easeOut('#alert-message'));
+              $('#dataMatrix').val('')
+              $('#current_value').text(`${dataMatrix_array.length}`)
+            }
+
+          } else {
+            // Numero de cliente incorrecto
+            $('#dataMatrix').val('')
+            $('#message').text(" DataMatrix incorrecta ")
+            $('#alert').removeClass("alert-success").addClass("alert-danger")
+            //$('#alert-message').slideDown("slower").delay(1000).fadeOut();
+            $('#alert-message').stop(true, false).animate({ opacity: 1 }, 0, easeIn('#alert-message')).animate({ opacity: 1 }, 1000).animate({ opacity: 0 }, 0, easeOut('#alert-message'));
+          }
+
+          //Se abre modal cuando se completa el estandar pack
+          if (dataMatrix_array.length != 0 && dataMatrix_array.length == std_pack) {
+            $('#dataMatrix').attr('readonly', true)
+            $('#modalCenter').modal('show')
+            setTimeout(function () { $('#no_serial').focus() }, 500);
+          }
+        })
+        request.fail(function (err) {
+          console.log(err);
+        })
+      } else {
+        location.reload();
+      }
+    }
+  })
+
+  $('#no_serial').keypress(function (event) {
+
+    if (event.keyCode === 13) {
+      let no_serial = $('#no_serial').val()
+      //console.log(no_serial);
+      if (no_serial === "80") {
+        location.reload()
+      }
+        if (no_serial.charAt(0) == "s" && no_serial.length > 8 || no_serial.charAt(0) == "S" && no_serial.length > 8) {
+
+          data = { serial: `${no_serial.substring(1)}`, dataMatrix_array, no_sap: `${$('#no_sap').val()}` }
+          let request = $.ajax({
+            type: "POST",
+            url: `/guardar/`,
+            data: data,
+            //contentType: "application/json; charset=utf-8",
+            dataType: "json",
+          });
+          request.done(function (result) {
+            msg = JSON.parse(result)
+            if (msg.msg != "serial_duplicado") {
+              console.log("all ok");
+              $('#messageModal').text(" Serial Correcto Guardando..... ")
+              $('#alertModal').removeClass("alert-danger").addClass("alert-success")
+              $('.modal-footer').stop(true, false).animate({ opacity: 1 }, 0, easeIn('.modal-footer')).animate({ opacity: 1 }, 1000).animate({ opacity: 0 }, 0, easeOut('.modal-footer'));
+              location.reload();
+            } else {
+              $('#no_serial').val('')
+              $('#messageModal').text(" Serial Duplicado ")
+              $('#alertModal').removeClass("alert-success").addClass("alert-danger")
+              $('.modal-footer').stop(true, false).animate({ opacity: 1 }, 0, easeIn('.modal-footer')).animate({ opacity: 1 }, 1000).animate({ opacity: 0 }, 0, easeOut('.modal-footer'));
+              console.error(msg.msg);
+            }
+          })
+          request.fail(function (err) {
+            console.log(err);
+          })
+        } else {
+          $('#no_serial').val('')
+          $('#messageModal').text(" Serial Incorrecto ")
+          $('#alertModal').removeClass("alert-success").addClass("alert-danger")
+          $('.modal-footer').stop(true, false).animate({ opacity: 1 }, 0, easeIn('.modal-footer')).animate({ opacity: 1 }, 1000).animate({ opacity: 0 }, 0, easeOut('.modal-footer'));
+        }
+      }
+
+  })
+
+
+</script>

@@ -1,0 +1,44 @@
+<%include ./static/header.ejs %>
+<%include ./static/sidebar.ejs%>
+<%include ./static/navbar.ejs%>
+<!-- Begin Page Content -->
+<div class="container " id="back">
+
+    <div class="row">
+        <div class="col-2"></div>
+        <div class="col-lg-8">
+            <form>
+                <div class="card">
+                    <div class="card">
+                        <div class="card-header bg">
+                            <div class="row ">
+                                <div class="col-lg-12 text-center">
+                                    <img class="animated pulse  " id="logo_index" src="/img/TristoneLogo.png" alt="">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body text-center">
+                        <div class="form-group">
+                            <label for="password">Contraseña</label>
+                            <div class="input-group input-group-lg">
+                                <div class="input-group-prepend">
+                                  <span class="input-group-text" id="inputGroup-sizing-lg"><i class="fas fa-unlock-alt"></i></span></span>
+                                </div>
+                                <input type="password" class="form-control" id="password">
+                              </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="col lg-2"></div>
+    </div>
+
+
+    <!-- /.container-fluid -->
+</div>
+
+
+<% include ./static/footer.ejs %>
