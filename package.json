@@ -19,7 +19,7 @@
     "animate.css": "^3.7.2",
     "bootstrap": "^4.4.1",
     "ejs": "^2.7.4",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "express-flash": "0.0.2",
     "express-session": "^1.17.0",
     "jquery": "^3.4.1",
